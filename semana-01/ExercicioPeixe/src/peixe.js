@@ -75,8 +75,7 @@ function create() {
     // Quando eles se sobrepõem, a função 'comerPeixe' é chamada
     this.physics.add.overlap(tubaraozinho, peixinhos, comerPeixe, null, this);
 }
-
-// A função update é chamada a cada frame do jogo
+// Atualiza a posição do tubarão a cada frame com base no ponteiro do jogador
 function update() {
     // Faz o tubarão seguir a posição do mouse (ponteiro)
     tubaraozinho.x = this.input.x;
