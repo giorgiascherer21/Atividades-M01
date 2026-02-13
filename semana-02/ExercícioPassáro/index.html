@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Importando o Phaser pelo CDN -->
+    <!-- .min.js é a versão "minificada", ou seja, menor e mais leve -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+
+    <title>Exercício do Pássaro</title>
+
+    <style>
+        /* Centraliza o jogo no meio da tela */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<script>
+
+    // Configuração principal do jogo
+    var config = {
+        type: Phaser.AUTO, // Phaser escolhe automaticamente WebGL ou Canvas
+        width: 800,        // largura da tela
+        height: 600,       // altura da tela
+
+        scene: {
+            preload: preload, // carrega os arquivos antes do jogo iniciar
+            create: create,   // cria os elementos na tela
+            update: update    // roda várias vezes por segundo (loop do jogo)
+        }
+    };
+
+    // Inicializa o jogo
+    var game = new Phaser.Game(config);
+
+    // Variáveis que controlam o pássaro
+    var passarinho;
+    var indo = true;      // controla direção horizontal
+    var subindo = true;   // controla direção vertical
+
+    function preload() {
+
+        // Carrega o fundo
+        this.load.image('bg', 'assets/bg_space.png');
+
+        // Carrega a spritesheet do pássaro
+        // Cada frame tem 75x75 pixels
+        this.load.spritesheet('bird', 'assets/bird-green.png', {
+            frameWidth: 75,
+            frameHeight: 75
+        });
+    }
+
+    function create() {
+
+        // Coloca o fundo no centro (400,300 é o centro da tela 800x600)
+        this.add.image(400, 300, 'bg').setScale(1.2);
+
+        // Cria o pássaro na posição inicial
+        passarinho = this.add.sprite(100, 300, 'bird');
+
+        // Cria a animação das asas usando os frames 0 até 7
+        this.anims.create({
+            key: 'voar',
+            frames: this.anims.generateFrameNumbers('bird', {
+                start: 0,
+                end: 7
+            }),
+            frameRate: 10, // velocidade da animação
+            repeat: -1     // repete para sempre
+        });
+
+        // Inicia a animação
+        passarinho.anims.play('voar');
+    }
+
+    function update() {
+
+        // -------- MOVIMENTO HORIZONTAL --------
+
+        if (indo && passarinho.x < 700) {
+            // enquanto estiver indo e não chegou no limite direito
+            passarinho.x += 2; // anda para direita
+            passarinho.setFlip(false, false); // imagem normal
+        }
+
+        if (passarinho.x >= 700) {
+            // quando chega no limite direito
+            indo = false; // começa a voltar
+        }
+
+        if (!indo && passarinho.x > 100) {
+            // se estiver voltando e ainda não chegou no início
+            passarinho.x -= 2; // anda para esquerda
+            passarinho.setFlip(true, false); // espelha horizontalmente
+        }
+
+        if (passarinho.x <= 100) {
+            // quando volta para o ponto inicial
+            indo = true; // começa a ir para direita novamente
+        }
+
+        // -------- MOVIMENTO VERTICAL --------
+
+        if (subindo && passarinho.y > 150) {
+            // sobe até o limite superior
+            passarinho.y -= 1;
+        }
+
+        if (passarinho.y <= 150) {
+            // quando chega no topo
+            subindo = false;
+        }
+
+        if (!subindo && passarinho.y < 450) {
+            // desce até o limite inferior
+            passarinho.y += 1;
+        }
+
+        if (passarinho.y >= 450) {
+            // quando chega embaixo
+            subindo = true;
+        }
+
+        // Estrutura de repetição (for) 
+        // Aqui executa 1 vez a cada update
+        for (let i = 0; i < 1; i++) {
+            console.log("loop ativo");
+        }
+    }
+
+</script>
+
+</body>
+</html>
