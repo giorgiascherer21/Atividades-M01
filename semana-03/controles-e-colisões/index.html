@@ -1,35 +1,277 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercício do Alien</title>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
 
-    <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;} </style>
+<style>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+</style>
 </head>
 
 <body>
-     <script>
-        const larguraJogo = 700;
-        const alturaJogo = 850;
 
-        const config = {
-            type: Phaser.AUTO,
-            width: larguraJogo,
-            height: alturaJogo,
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            }
-        };  
+<script>
 
-        const game = new Phaser.Game(config);
+// Tamanho do jogo
+// Aqui criei duas constantes que vão definir o tamanho do logo, largura e altura. 
+const larguraJogo = 700;
+const alturaJogo = 850; 
 
-        function preload() {
-           
+// =============================
+// Variaveis globais
+// Aqui criei as variáveis globais que vão ser usadas em várias partes do código, como o alien, fogo, plataformas, teclas, moedas, placar e pontuação.
+let alien;
+let fogo;
+let plataforma;
+let plataforma2;
+let teclas;
+let moedas;
+let placar;
+let pontuacao = 0;
+
+// Além disso, criei uma variável para o coração e outra para a próxima meta de pontos para aparecer o coração, que é a cada 10 pontos. 
+let coracao = null;
+let proximaMetaCoracao = 10;
+
+// E uma variável para verificar se o jogo foi finalizado.
+let jogoFinalizado = false;
+
+// =============================
+// Configuração do jogo (Phaser)
+// =============================
+const config = {
+    type: Phaser.AUTO, // mode de renderização automática (WebGL ou Canvas)
+    width: larguraJogo,
+    height: alturaJogo,
+
+    physics: { // configurações de física
+        default: 'arcade', // tipo de física arcade, que é simples e eficiente para jogos 2D
+        arcade: {
+            gravity: { y: 300 }, // gravidade aplicada aos objetos, puxando-os para baixo
+            debug: false // desativa o modo de depuração, que mostra as bordas dos objetos e outras informações úteis para desenvolvimento, mas pode ser confuso para jogadores. (Nesse caso, preferi desativar para deixar o jogo mais limpo visualmente)
+        }
+
+    },
+
+    scene: { // configurações de cena
+        preload, // função de pré-carregamento, onde carregamos os assets do jogo (imagens, sons, etc.)
+        create, // função de criação, onde configuramos os objetos do jogo, como o alien, plataformas, moedas, etc.
+        update // função de atualização, onde colocamos a lógica do jogo que precisa ser verificada a cada frame, como o movimento do alien, colisões, etc.
+    }
+};
+
+
+// Inicializa o jogo Phaser usando as configurações definidas anteriormente.
+// A partir daqui o Phaser começa a executar o ciclo de vida da cena (preload → create → update).
+const game = new Phaser.Game(config);
+
+
+// =============================
+// PRELOAD
+// =============================
+// Função executada uma única vez antes do jogo começar.
+function preload() { // aqui carregamos as imagens que vamos usar no jogo.
+    this.load.image('alien', 'assets/alienigena.png');
+    this.load.image('fogo', 'assets/turbo.png');
+    this.load.image('plataforma', 'assets/tijolos.png');
+    this.load.image('moeda', 'assets/moeda.png');
+    this.load.image('coracao', 'assets/coracao.png');
+}
+
+// =============================
+// CREATE
+// =============================
+function create() { // função executada uma única vez após o preload, onde configuramos os objetos do jogo.
+    // Reset das variáveis principais sempre que a cena inicia ou reinicia.
+    pontuacao = 0;
+    proximaMetaCoracao = 10;
+    jogoFinalizado = false;
+    coracao = null;
+
+    this.add.image(larguraJogo/2, alturaJogo/2, 'background'); // Adiciona uma imagem de fundo centralizada no jogo.
+
+   
+// Aqui criamos duas plataformas usando a imagem de tijolos, e as posicionamos em lugares diferentes do jogo. Elas são estáticas, ou seja, não se movem e não são afetadas pela gravidade.
+    plataforma = this.physics.add.staticImage(larguraJogo/2, 650, 'plataforma');
+    plataforma2 = this.physics.add.staticImage(larguraJogo/2, 300, 'plataforma');
+
+    fogo = this.add.sprite(0, 0, 'fogo'); // Sprite do fogo 
+    fogo.setVisible(false); // Inicialmente, o fogo está invisível, e só vai aparecer quando o alien pular (quando a tecla de cima for pressionada).
+
+    alien = this.physics.add.sprite(larguraJogo/2, 100, 'alien'); // Sprite do alien
+    alien.setCollideWorldBounds(true);
+
+    // Adiciona colisão entre o alien e as plataformas, para que ele possa pular e ficar em cima delas.
+    this.physics.add.collider(alien, plataforma);
+    this.physics.add.collider(alien, plataforma2);
+
+    // Configura as teclas de controle do jogo, usando as setas do teclado (cima, baixo, esquerda, direita).
+    teclas = this.input.keyboard.createCursorKeys();
+
+    // Cria um grupo de moedas com física Arcade.
+    moedas = this.physics.add.group();
+
+    for (let i = 0; i < 3; i++) { // // Loop para criar 3 moedas em posições aleatórias.
+        let moeda = moedas.create(
+            Phaser.Math.Between(100, 600),
+            Phaser.Math.Between(100, 400),
+            'moeda'
+        );
+
+        moeda.setBounce(0.7);     // Faz a moeda quicar ao colidir com plataformas.
+        moeda.setCollideWorldBounds(true);     // Impede que a moeda saia dos limites da tela.
+
+    } 
+
+    // Adiciona colisão física entre as moedas e as plataformas.
+    // Isso permite que elas caiam pela gravidade e parem sobre as plataformas.
+    this.physics.add.collider(moedas, plataforma);
+    this.physics.add.collider(moedas, plataforma2);
+
+    // Adiciona detecção de overlap entre o alien e as moedas.
+    this.physics.add.overlap(alien, moedas, coletarMoeda, null, this);
+
+    // Cria o texto do placar na tela.
+    // Ele será atualizado dinamicamente conforme a pontuação aumenta.
+        placar = this.add.text(50, 50, 'Moedas: 0', {
+    fontSize: '45px',
+    fill: '#495613'
+});
+
+}
+
+// =============================
+// UPDATE
+// =============================
+function update() {
+
+    // Se o jogo terminou, interrompe a execução da lógica de movimento.
+    if (jogoFinalizado) return;
+
+    // Reseta a velocidade horizontal a cada frame.
+    alien.setVelocityX(0);
+
+    // Movimento horizontal baseado nas teclas pressionadas.
+    if (teclas.left.isDown) {
+        alien.setVelocityX(-200);
+    }
+    else if (teclas.right.isDown) {
+        alien.setVelocityX(200);
+    }
+
+    // Movimento vertical (impulso para cima).
+    if (teclas.up.isDown) {
+        alien.setVelocityY(-250);
+        fogo.setVisible(true); // ativa efeito visual
+    } else {
+        fogo.setVisible(false);
+    }
+
+    // Mantém o fogo sempre alinhado abaixo do alien.
+    fogo.setPosition(alien.x, alien.y + alien.height/2);
+}
+
+// =============================
+// COLETAR MOEDA
+// =============================
+function coletarMoeda(alienSprite, moeda) {
+
+    moeda.disableBody(true, true);
+
+     // Incrementa pontuação.
+    pontuacao += 1;
+    placar.setText('Moedas: ' + pontuacao);
+
+    // Reativa a moeda em nova posição aleatória.
+    moeda.enableBody(
+        true,
+        Phaser.Math.Between(50, larguraJogo - 50),
+        100,
+        true,
+        true
+    );
+
+    verificarCoracao(); // verifica se deve criar o bônus
+    verificarVitoria(); // verifica se o jogador alcançou a pontuação necessária para vencer
+}
+
+// =============================
+// CORAÇÃO A CADA 10 PONTOS
+// =============================
+// Verifica se a pontuação atingiu a meta para gerar um bônus.
+// Um coração é criado a cada 10 moedas coletadas.
+function verificarCoracao() {
+
+    if (pontuacao >= proximaMetaCoracao && !coracao) {
+
+        const scene = game.scene.scenes[0]; // Obtém a cena atual do jogo para adicionar o coração.
+
+        coracao = scene.physics.add.sprite( // Cria um sprite de coração em uma posição aleatória dentro dos limites do jogo.
+            Phaser.Math.Between(100, larguraJogo - 100),
+            Phaser.Math.Between(150, 400),
+            'coracao'
+        );
+
+        coracao.body.setAllowGravity(false);
+        coracao.setCollideWorldBounds(true);
+
+        // Adiciona detecção de overlap entre o alien e o coração.
+        scene.physics.add.overlap(alien, coracao, () => { 
+
+            pontuacao += 5;
+            placar.setText('Moedas: ' + pontuacao);
+
+            coracao.destroy();
+            coracao = null;
+
+        });
+
+        proximaMetaCoracao += 10; // Atualiza a meta para o próximo bônus.
+    }
+}
+
+// =============================
+// VITÓRIA
+// =============================
+// Verifica se o jogador atingiu a pontuação necessária para vencer.
+function verificarVitoria() { 
+
+    if (pontuacao >= 50 && !jogoFinalizado) {
+
+        const scene = game.scene.scenes[0];
+
+        jogoFinalizado = true;
+        scene.physics.pause();
+
+        scene.add.text(larguraJogo/2, alturaJogo/2 - 50, 'WIN!', { // Exibe a mensagem de vitória no centro da tela.
+            fontSize: '80px',
+            fill: '#ffffff'
+        }).setOrigin(0.5);
+
+        let botao = scene.add.text(larguraJogo/2, alturaJogo/2 + 40, 'Recomeçar', { // Adiciona um botão de "Recomeçar" abaixo da mensagem de vitória.
+            fontSize: '40px',
+            fill: '#00ff00'
+        })
+        .setOrigin(0.5)
+        .setInteractive();
+
+        botao.on('pointerdown', () => {
+            scene.scene.restart();
+        });
+    }
+}
+
+</script>
+
+</body>
+</html>
