@@ -1,19 +1,12 @@
 # Exercício do Alien – Jogo 2D com Phaser
 
-<div align="center">
-
-<h1 style="
-    padding: 40px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #0f2027, #2c7744, #00ff88);
-    color: white;
-    font-size: 48px;
-    letter-spacing: 4px;
-">
-JOGO ALIEN
-</h1>
-
-</div>
+<p align="center">
+  <img 
+    src="https://capsule-render.vercel.app/api?type=blur&height=470&color=0:0B3D2E,50:1DB954,100:A8E6CF&text=Exercício%20Alien&textBg=false&section=header&reversal=true&fontColor=FFFFFF&fontSize=40&fontAlign=50&animation=fadeIn&descAlign=50" 
+    alt="Exercício Alien Banner" 
+    width="700"
+  />
+</p>
 
 ## Como Executar o Projeto? 
 
