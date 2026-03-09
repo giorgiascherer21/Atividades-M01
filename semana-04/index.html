@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicórnio Arco-Íris - Phaser 3</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+        
+        #game-container {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    
+    <!-- Importar as cenas do jogo -->
+    <script src="scenes/Welcome.js"></script>
+    <script src="scenes/Gameplay.js"></script>
+    
+    <!-- Script principal de configuração -->
+    <script>
+        // ========================================
+        // CONFIGURAÇÃO PRINCIPAL DO JOGO PHASER 3
+        // ========================================
+        
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            
+            // Configuração de física (arcade)
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 300 },
+                    debug: false
+                }
+            },
+            
+            // Configuração de escala responsiva
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
+            
+            // Cor de fundo
+            backgroundColor: '#87CEEB',
+            
+            // Cenas do jogo (ordem importa!)
+            scene: [Welcome, Gameplay]
+        };
+        
+        // Criar instância do jogo
+        const game = new Phaser.Game(config);
+        
+        // Iniciar com a cena Welcome
+        game.scene.start('Welcome');
+    </script>
+</body>
+</html>
