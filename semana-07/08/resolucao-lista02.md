@@ -8,7 +8,24 @@
 
 **Justificativa:**  
 
-A expressão lógica resulta em true, pois todas as comparações da expressão são verdadeiras. Depois disso, o código percorre o array multiplicando seus valores, resultando em 29160.
+A expressão lógica é avaliada respeitando a precedência dos operadores:
+
+- Primeiro o operador `%` (módulo)
+- Depois as comparações (`===`, `>`, `<`)
+- Em seguida o operador `&&`
+- Por fim o operador `||`
+
+Calculando passo a passo:
+
+- `p % q = 10 % 3 = 1` → `1 === 1` → true  
+- `r * 2 = 12` → `12 > 10` → true  
+- `q + r = 9` → `9 < 10` → true  
+
+Então a expressão fica:
+
+(true && true) || true → true
+
+Após isso, o código percorre o array multiplicando todos os valores, resultando em 29160.
 
 ----
 
@@ -18,8 +35,17 @@ _A) Ambas as funções exibirão: 'Seu crédito foi aprovado. Saldo disponível:
 
 **Justificativa:**
 
+Ambas as funções percorrem o array de compras somando os valores enquanto o total não ultrapassa o limite e ainda há elementos a serem processados.
 
-As duas funções percorrem o array de compras somando os valores progressivamente até atingir o limite ou o fim do array. Ao final, a soma total é 4600, que ainda está dentro do limite de 5000, resultando em um saldo disponível de 400. Como esse valor é positivo, o crédito permanece aprovado. Apesar da diferença entre `do...while` e `while`, nesse caso específico ambas executam o mesmo número de iterações, levando exatamente ao mesmo resultado.
+A soma evolui da seguinte forma:
+- 2500 → 3700 → 4500 → 4600
+
+Como o total final (4600) é menor que o limite (5000), o saldo disponível será:
+5000 - 4600 = 400
+
+Como o saldo é positivo, o status permanece como "aprovado".
+
+Apesar da diferença entre `while` e `do...while`, neste caso específico ambas executam o mesmo número de iterações, pois a condição de parada impede que o limite seja ultrapassado. Portanto, o resultado final é idêntico nas duas funções.
 
 ## **3)** **Alternativa**
 
@@ -33,17 +59,47 @@ O código usa uma estrutura condicional encadeada para classificar a idade. Como
 
 ## **4)** **Alternativa**
 
-_D) Dispositivo 1 ligado. Energia restante: 900  
-Dispositivo 2 ligado. Energia restante: 300  
-Dispositivo 3 ligado com bateria extra. Energia restante: 200  
-Dispositivo 4 não pode ser ligado. Energia insuficiente.  
-Dispositivo 5 não pode ser ligado. Energia insuficiente._
+_B)_
 
-**Justificativa:**  
+- Dispositivo 1 ligado. Energia restante: 900  
 
-Os dois primeiros dispositivos consomem apenas a energia disponível. No terceiro, a energia não é suficiente e a bateria extra é utilizada. Após o uso da bateria extra no terceiro dispositivo, a energia disponível e a bateria restante não são suficientes para os próximos.
+- Dispositivo 2 ligado. Energia restante: 300  
 
-----
+- Dispositivo 3 ligado com bateria extra. Energia restante: 200  
+
+- Dispositivo 4 não pode ser ligado. Energia insuficiente.  
+
+- Dispositivo 5 não pode ser ligado. Energia insuficiente.  
+
+**Justificativa:**
+
+Inicialmente:
+- energiaDisponivel = 1200
+- bateriaExtra = 400
+
+**Dispositivo 1 (300):**
+Consumo menor que energia disponível → ligado normalmente  
+Energia restante: 1200 - 300 = 900
+
+**Dispositivo 2 (600):**
+Consumo menor que energia disponível (900) → ainda cabe na energia principal  
+Energia restante: 900 - 600 = 300
+
+**Dispositivo 3 (500):**
+Consumo maior que energia disponível (300), mas menor que energia total disponível (300 + 400 = 700)  
+→ ligado utilizando a bateria extra  
+Energia restante: 700 - 500 = 200  
+
+Após isso:
+- energiaDisponivel é zerada
+- bateriaExtra é reduzida com base no consumo restante, podendo assumir valores negativos devido à forma como o código foi implementado
+
+**Dispositivos 4 e 5:**
+Não podem ser ligados, pois não há energia suficiente disponível.
+
+Portanto, a alternativa correta é a B.
+
+---
 
 ## **5)** **Alternativa**
 
@@ -93,7 +149,6 @@ A função utiliza uma estrutura condicional simples para classificar o frete co
 ----
 
 ## **8)**
-
 ```javascript
 class Veiculo {
     constructor(modelo, ano) {
@@ -102,7 +157,7 @@ class Veiculo {
     }
 
     calcularConsumo() {
-        return "Método não implementado";
+        return "Método deve ser sobrescrito";
     }
 }
 
@@ -117,28 +172,35 @@ class Carro extends Veiculo {
         if (this.litrosConsumidos <= 0) {
             return "Dados inválidos";
         }
-        return this.kmRodados / this.litrosConsumidos;
+
+        let consumo = this.kmRodados / this.litrosConsumidos;
+
+        return `Carro: ${consumo.toFixed(2)} km/L`;
     }
 }
 
 class Moto extends Veiculo {
-    constructor(modelo, ano, kmRodados, litrosConsumidos) {
+    constructor(modelo, ano, kmRodados, litrosConsumidos, cilindradas) {
         super(modelo, ano);
         this.kmRodados = kmRodados;
         this.litrosConsumidos = litrosConsumidos;
+        this.cilindradas = cilindradas;
     }
 
     calcularConsumo() {
         if (this.litrosConsumidos <= 0) {
             return "Dados inválidos";
         }
-        return this.kmRodados / this.litrosConsumidos;
+
+        let consumoBase = this.kmRodados / this.litrosConsumidos;
+
+        if (this.cilindradas > 500) {
+            consumoBase *= 0.9;
+        }
+
+        return `Moto: ${consumoBase.toFixed(2)} km/L`;
     }
 }
-
-// Exemplo:
-// const carro = new Carro("Civic", 2020, 500, 25);
-// console.log(carro.calcularConsumo());
 
 ```
 
@@ -151,12 +213,17 @@ A solução aplica herança para reutilizar atributos da classe base e sobrescre
 ## **9)**
 
 ```javascript
-function simularPouso(velocidadeInicial, desaceleracao, velocidadeSegura, tempoMaximo) {
+function simularPouso(velocidadeInicial, desaceleracao, velocidadeSegura, tempoMaximo, desaceleracaoMinima) {
     let tempo = 0;
     let velocidade = velocidadeInicial;
 
+    if (desaceleracao < desaceleracaoMinima) {
+        return "Falha: desaceleração insuficiente para pouso seguro";
+    }
+
     while (velocidade > velocidadeSegura && tempo < tempoMaximo) {
         tempo++;
+
         velocidade = velocidadeInicial - desaceleracao * tempo;
 
         if (velocidade < 0) {
@@ -168,7 +235,7 @@ function simularPouso(velocidadeInicial, desaceleracao, velocidadeSegura, tempoM
     if (velocidade <= velocidadeSegura) {
         return `Pouso seguro em ${tempo} segundos`;
     } else {
-        return "Falha no pouso: tempo máximo excedido";
+        return "Falha: tempo máximo excedido";
     }
 }
 
@@ -184,15 +251,15 @@ O algoritmo simula a desaceleração ao longo do tempo usando a equação fornec
 ## **10)**
 
 ```javascript
-function multiplicarMatrizes(matrizA, matrizB) {
-    // Verificação de compatibilidade
+function MultiplicarMatrizesInvestimento(matrizA, matrizB) {
+    // Verifica compatibilidade
     if (matrizA[0].length !== matrizB.length) {
-        return "Multiplicação impossível";
+        return "As matrizes não podem ser multiplicadas. Dimensões incompatíveis.";
     }
 
-    const linhasA = matrizA.length;
-    const colunasB = matrizB[0].length;
-    const colunasA = matrizA[0].length;
+    let linhasA = matrizA.length;
+    let colunasA = matrizA[0].length;
+    let colunasB = matrizB[0].length;
 
     let resultado = [];
 
