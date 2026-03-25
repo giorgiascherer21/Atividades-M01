@@ -8,14 +8,14 @@
 
 **Justificativa:**  
 
-A expressão lógica é avaliada respeitando a precedência dos operadores:
+A expressão segue a ordem normal dos operadores:
 
 - Primeiro o operador `%` (módulo)
 - Depois as comparações (`===`, `>`, `<`)
 - Em seguida o operador `&&`
 - Por fim o operador `||`
 
-Calculando passo a passo:
+Fazendo as contas:
 
 - `p % q = 10 % 3 = 1` → `1 === 1` → true  
 - `r * 2 = 12` → `12 > 10` → true  
